@@ -11,30 +11,87 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
+    TextEditingController firstNameController = TextEditingController();
+    TextEditingController lastNameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+    String errorMessage = "good";
 
-    final email = TextField(
+    final firstName = TextFormField(
+      controller: firstNameController,
+      decoration: const InputDecoration(
+        hintText: "First Name",
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
+    );
+
+    final lastName = TextFormField(
+      controller: lastNameController,
+      decoration: const InputDecoration(
+        hintText: "Last Name",
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
+    );
+
+    final email = TextFormField(
       controller: emailController,
       decoration: const InputDecoration(
         hintText: "Email",
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
     );
 
-    final password = TextField(
+    final password = TextFormField(
       controller: passwordController,
       obscureText: true,
       decoration: const InputDecoration(
         hintText: 'Password',
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
     );
 
     final SignupButton = Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: ElevatedButton(
         onPressed: () async {
-    
-          if (context.mounted) Navigator.pop(context);
+          errorMessage = await context
+              .read<AuthProvider>()
+              .signUp(emailController.text, passwordController.text);
+          if (_formKey.currentState!.validate()) {
+            if (errorMessage == "good") {
+              if (context.mounted) Navigator.pop(context);
+            } else {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text(errorMessage),
+                  );
+                },
+              );
+            }
+          }
         },
         child: const Text('Sign up', style: TextStyle(color: Colors.white)),
       ),
@@ -52,21 +109,26 @@ class _SignupPageState extends State<SignupPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-          children: <Widget>[
-            const Text(
-              "Sign Up",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 25),
-            ),
-            email,
-            password,
-            SignupButton,
-            backButton
-          ],
+      body: Form(
+        key: _formKey,
+        child: Center(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+            children: <Widget>[
+              const Text(
+                "Sign Up",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 25),
+              ),
+              firstName,
+              lastName,
+              email,
+              password,
+              SignupButton,
+              backButton
+            ],
+          ),
         ),
       ),
     );

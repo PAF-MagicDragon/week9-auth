@@ -12,24 +12,66 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
+    TextEditingController firstNameController = TextEditingController();
+    TextEditingController lastNameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+    String errorMessage = "good";
 
-    final email = TextField(
+    final firstName = TextFormField(
+      controller: firstNameController,
+      decoration: const InputDecoration(
+        hintText: "First Name",
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
+    );
+
+    final lastName = TextFormField(
+      controller: lastNameController,
+      decoration: const InputDecoration(
+        hintText: "Last Name",
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
+    );
+
+    final email = TextFormField(
       key: const Key('emailField'),
       controller: emailController,
       decoration: const InputDecoration(
         hintText: "Email",
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
     );
 
-    final password = TextField(
+    final password = TextFormField(
       key: const Key('pwField'),
       controller: passwordController,
       obscureText: true,
       decoration: const InputDecoration(
         hintText: 'Password',
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
     );
 
     final loginButton = Padding(
@@ -37,7 +79,26 @@ class _LoginPageState extends State<LoginPage> {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: ElevatedButton(
         onPressed: () async {
-
+          errorMessage = await context.read<AuthProvider>().signIn(
+                emailController.text.trim(),
+                passwordController.text.trim(),
+              );
+          if (_formKey.currentState!.validate()) {
+            print(errorMessage);
+            if (errorMessage != "good") {
+              print("ya");
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text(errorMessage),
+                  );
+                },
+              );
+            } else {
+              print("yi");
+            }
+          }
         },
         child: const Text('Log In', style: TextStyle(color: Colors.white)),
       ),
@@ -60,21 +121,26 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-          children: <Widget>[
-            const Text(
-              "Login",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 25),
-            ),
-            email,
-            password,
-            loginButton,
-            signUpButton,
-          ],
+      body: Form(
+        key: _formKey,
+        child: Center(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+            children: <Widget>[
+              const Text(
+                "Login",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 25),
+              ),
+              firstName,
+              lastName,
+              email,
+              password,
+              loginButton,
+              signUpButton,
+            ],
+          ),
         ),
       ),
     );
